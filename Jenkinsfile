@@ -39,14 +39,12 @@ pipeline {
                 echo 'Testing database connection...'
                 script {
                     try {
-                        withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                         usernameVariable: 'YIPBL',
-                                                         passwordVariable: 'YIPBL')]) {
+                        withCredentials([string(credentialsId: 'YIPBL', variable: 'DB_CREDENTIAL')]) {
                             bat '''
                                 mvn liquibase:status \
-                                    -Dliquibase.url=${DB_URL} \
-                                    -Dliquibase.username=${YIPBL} \
-                                    -Dliquibase.password=${YIPBL}
+                                    -Dliquibase.url=%DB_URL% \
+                                    -Dliquibase.username=%DB_CREDENTIAL% \
+                                    -Dliquibase.password=%DB_CREDENTIAL%
                             '''
                         }
                         echo 'Database connection successful'
@@ -61,29 +59,24 @@ pipeline {
         stage('Fix Checksum Issues') {
             steps {
                 echo 'Clearing checksum validation issues...'
-                withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                 usernameVariable: 'YIPBL',
-                                                 passwordVariable: 'YIPBL')]) {
+                withCredentials([string(credentialsId: 'YIPBL', variable: 'DB_CREDENTIAL')]) {
                     script {
                         try {
-                            // Option 1: Clear checksums for problematic changesets
                             bat '''
                                 mvn liquibase:clearCheckSums \
-                                    -Dliquibase.url=${DB_URL} \
-                                    -Dliquibase.username=${YIPBL} \
-                                    -Dliquibase.password=${YIPBL}
+                                    -Dliquibase.url=%DB_URL% \
+                                    -Dliquibase.username=%DB_CREDENTIAL% \
+                                    -Dliquibase.password=%DB_CREDENTIAL%
                             '''
                             echo 'Checksums cleared successfully'
                         } catch (Exception e) {
                             echo "Clear checksums failed, trying alternative approach..."
-                            
-                            // Option 2: Mark changesets as executed (if they were already run)
                             try {
                                 bat '''
                                     mvn liquibase:changelogSync \
-                                        -Dliquibase.url=${DB_URL} \
-                                        -Dliquibase.username=${YIPBL} \
-                                        -Dliquibase.password=${YIPBL}
+                                        -Dliquibase.url=%DB_URL% \
+                                        -Dliquibase.username=%DB_CREDENTIAL% \
+                                        -Dliquibase.password=%DB_CREDENTIAL%
                                 '''
                                 echo 'Changelog sync completed'
                             } catch (Exception e2) {
@@ -99,14 +92,12 @@ pipeline {
         stage('Verify Status After Fix') {
             steps {
                 echo 'Verifying database status after checksum fix...'
-                withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                 usernameVariable: 'YIPBL',
-                                                 passwordVariable: 'YIPBL')]) {
+                withCredentials([string(credentialsId: 'YIPBL', variable: 'DB_CREDENTIAL')]) {
                     bat '''
                         mvn liquibase:status \
-                            -Dliquibase.url=${DB_URL} \
-                            -Dliquibase.username=${YIPBL} \
-                            -Dliquibase.password=${YIPBL} \
+                            -Dliquibase.url=%DB_URL% \
+                            -Dliquibase.username=%DB_CREDENTIAL% \
+                            -Dliquibase.password=%DB_CREDENTIAL% \
                             -Dliquibase.verbose=true
                     '''
                 }
@@ -116,14 +107,12 @@ pipeline {
         stage('Liquibase Update') {
             steps {
                 echo 'Running Liquibase database migrations...'
-                withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                 usernameVariable: 'YIPBL',
-                                                 passwordVariable: 'YIPBL')]) {
+                withCredentials([string(credentialsId: 'YIPBL', variable: 'DB_CREDENTIAL')]) {
                     bat '''
                         mvn liquibase:update \
-                            -Dliquibase.url=${DB_URL} \
-                            -Dliquibase.username=${YIPBL} \
-                            -Dliquibase.password=${YIPBL}
+                            -Dliquibase.url=%DB_URL% \
+                            -Dliquibase.username=%DB_CREDENTIAL% \
+                            -Dliquibase.password=%DB_CREDENTIAL%
                     '''
                 }
             }
@@ -132,14 +121,12 @@ pipeline {
         stage('Generate Changelog Report') {
             steps {
                 echo 'Generating final changelog report...'
-                withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                 usernameVariable: 'YIPBL',
-                                                 passwordVariable: 'YIPBL')]) {
+                withCredentials([string(credentialsId: 'YIPBL', variable: 'DB_CREDENTIAL')]) {
                     bat '''
                         mvn liquibase:status \
-                            -Dliquibase.url=${DB_URL} \
-                            -Dliquibase.username=${YIPBL} \
-                            -Dliquibase.password=${YIPBL} \
+                            -Dliquibase.url=%DB_URL% \
+                            -Dliquibase.username=%DB_CREDENTIAL% \
+                            -Dliquibase.password=%DB_CREDENTIAL% \
                             -Dliquibase.verbose=true
                     '''
                 }
