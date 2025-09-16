@@ -40,13 +40,13 @@ pipeline {
                 script {
                     try {
                         withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                         usernameVariable: 'DB_USERNAME',
-                                                         passwordVariable: 'DB_PASSWORD')]) {
+                                                         usernameVariable: 'YIPBL',
+                                                         passwordVariable: 'YIPBL')]) {
                             bat '''
                                 mvn liquibase:status \
                                     -Dliquibase.url=${DB_URL} \
-                                    -Dliquibase.username=${DB_USERNAME} \
-                                    -Dliquibase.password=${DB_PASSWORD}
+                                    -Dliquibase.username=${YIPBL} \
+                                    -Dliquibase.password=${YIPBL}
                             '''
                         }
                         echo 'Database connection successful'
@@ -61,13 +61,13 @@ pipeline {
             steps {
                 echo 'Running Liquibase database migrations...'
                 withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                 usernameVariable: 'DB_USERNAME',
-                                                 passwordVariable: 'DB_PASSWORD')]) {
+                                                 usernameVariable: 'YIPBL',
+                                                 passwordVariable: 'YIPBL')]) {
                     bat '''
                         mvn liquibase:update \
                             -Dliquibase.url=${DB_URL} \
-                            -Dliquibase.username=${DB_USERNAME} \
-                            -Dliquibase.password=${DB_PASSWORD}
+                            -Dliquibase.username=${YIPBL} \
+                            -Dliquibase.password=${YIPBL}
                     '''
                 }
             }
@@ -77,13 +77,13 @@ pipeline {
             steps {
                 echo 'Generating changelog report...'
                 withCredentials([usernamePassword(credentialsId: 'YIPBL',
-                                                 usernameVariable: 'DB_USERNAME',
-                                                 passwordVariable: 'DB_PASSWORD')]) {
+                                                 usernameVariable: 'YIPBL',
+                                                 passwordVariable: 'YIPBL')]) {
                     bat '''
                         mvn liquibase:status \
                             -Dliquibase.url=${DB_URL} \
-                            -Dliquibase.username=${DB_USERNAME} \
-                            -Dliquibase.password=${DB_PASSWORD} \
+                            -Dliquibase.username=${YIPBL} \
+                            -Dliquibase.password=${YIPBL} \
                             -Dliquibase.verbose=true
                     '''
                 }
